@@ -80,8 +80,6 @@ class confluence (
 
   anchor { 'confluence::start':
   } ->
-  class { 'confluence::facts':
-  } ->
   class { 'confluence::install':
   } ->
   class { 'confluence::config':
