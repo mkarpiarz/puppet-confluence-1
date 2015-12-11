@@ -24,17 +24,6 @@ class confluence::facts(
     $dir      = ''
   }
 
-  if ! defined(File["/etc/${dir}facter"]) {
-    file { "/etc/${dir}facter":
-      ensure  => directory,
-    }
-  }
-  if ! defined(File["/etc/${dir}facter/facts.d"]) {
-    file { "/etc/${dir}facter/facts.d":
-      ensure  => directory,
-    }
-  }
-
   file { "/etc/${dir}facter/facts.d/confluence_facts.sh":
     ensure  => $ensure,
     content => template('confluence/facts.sh.erb'),
