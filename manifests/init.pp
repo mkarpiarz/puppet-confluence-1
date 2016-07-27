@@ -67,7 +67,20 @@ class confluence (
   $session_tokenkey = 'session.tokenkey',
   $session_validationinterval = 5,
   $session_lastvalidation = 'session.lastvalidation',
-) {
+
+  # Enable post-install configuration of Confluence.
+  $enable_post_install  = $confluence::params::enable_post_install,
+  $dbtype               = $confluence::params::dbtype,
+  $setupstep            = $confluence::params::setupstep,
+  $serverid             = $confluence::params::serverid,
+  $buildnumber          = $confluence::params::buildnumber,
+  $licensemessage       = $confluence::params::licensemessage,
+  $dbhost               = $confluence::params::dbhost,
+  $dbport               = $confluence::params::dbport,
+  $dbname               = $confluence::params::dbname,
+  $dbuser               = $confluence::params::dbuser,
+  $dbpassword           = $confluence::params::dbpassword,
+) inherits confluence::params {
 
   validate_re($version, '^(?:(\d+)\.)?(?:(\d+)\.)?(\*|\d+)(|[a-z])$')
   validate_absolute_path($installdir)
@@ -88,7 +101,7 @@ class confluence (
     # Shut it down in preparation for upgrade.
     if versioncmp($version, $::confluence_version) > 0 {
       notify { 'Attempting to upgrade CONFLUENCE': }
-      exec { $stop_confluence: before => Anchor['confluence::start'] }
+      exec { $stop_confluence: before => Class['::confluence::install'] }
     }
   }
 
@@ -96,15 +109,42 @@ class confluence (
     fail('You need to specify a value for javahome')
   }
 
-  anchor { 'confluence::start': } ->
-  class { '::confluence::facts': } ->
-  class { '::confluence::install': } ->
-  class { '::confluence::config': } ~>
-  class { '::confluence::service': } ->
-  anchor { 'confluence::end': }
+  class { '::confluence::install': before => Class['::confluence::config'] }
+  class { '::confluence::config': notify => Class['::confluence::service'] }
+  class { '::confluence::service': }
 
   if ($enable_sso) {
     class { '::confluence::sso':
     }
   }
+
+  validate_bool($enable_post_install)
+  if ($enable_post_install) {
+    validate_re($setupstep, ['^complete$', '^setupdata-start$' ],
+      'setupstep must be either "complete" or "setupdata-start"')
+    # server ID should be in the form XXXX-XXXX-XXXX-XXXX
+    validate_re($serverid, '^([0-9A-Z]{4}\-){3}[0-9A-Z]{4}$')
+    validate_re($licensemessage, '^[a-zA-Z0-9\/+=-]{501}$')
+    if $dbuser == undef {
+      fail('You need to specify a value for dbuser')
+    }
+    if $dbpassword == undef {
+      fail('You need to specify a value for dbpassword')
+    }
+    if $dbname == undef {
+      fail('You need to specify a value for dbname')
+    }
+    validate_integer($buildnumber)
+    validate_integer($dbport)
+
+    if $dbtype == 'postgresql' {
+      $dbdriver = 'org.postgresql.Driver'
+      $dbprotocol = 'postgresql'
+      $dbdialect = 'net.sf.hibernate.dialect.PostgreSQLDialect'
+    }
+    else {
+      fail('Unsupported type of database.')
+    }
+  }
+  class { '::confluence::post_install': }
 }
