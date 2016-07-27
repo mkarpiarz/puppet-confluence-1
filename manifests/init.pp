@@ -55,6 +55,9 @@ class confluence (
   # This required for upgrades
   $facts_ensure = 'present',
 
+  # Enable/disable colleting of custom facts within module.
+  $enable_custom_facts = true,
+
   # Enable SingleSignOn via Crowd
 
   $enable_sso = false,
@@ -96,8 +99,22 @@ class confluence (
     fail('You need to specify a value for javahome')
   }
 
+  if ($enable_custom_facts) {
+    # if custom facts are enabled, use appriopriate manifest
+    class { '::confluence::facts':
+      require => Anchor['confluence::start'],
+      before => Class['::confluence::install'],
+    }
+  }
+  else {
+    # only get parameters (which confluence::facts is inheriting)
+    class { '::confluence::params':
+      require => Anchor['confluence::start'],
+      before => Class['::confluence::install'],
+    }
+  }
+
   anchor { 'confluence::start': } ->
-  class { '::confluence::facts': } ->
   class { '::confluence::install': } ->
   class { '::confluence::config': } ~>
   class { '::confluence::service': } ->
