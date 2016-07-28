@@ -91,7 +91,7 @@ class confluence (
     # Shut it down in preparation for upgrade.
     if versioncmp($version, $::confluence_version) > 0 {
       notify { 'Attempting to upgrade CONFLUENCE': }
-      exec { $stop_confluence: before => Anchor['confluence::start'] }
+      exec { $stop_confluence: before => Class['::confluence::install'] }
     }
   }
 
@@ -101,24 +101,16 @@ class confluence (
 
   if ($enable_custom_facts) {
     # if custom facts are enabled, use appriopriate manifest
-    class { '::confluence::facts':
-      require => Anchor['confluence::start'],
-      before => Class['::confluence::install'],
-    }
+    class { '::confluence::facts': before => Class['::confluence::install'] }
   }
   else {
     # only get parameters (which confluence::facts is inheriting)
-    class { '::confluence::params':
-      require => Anchor['confluence::start'],
-      before => Class['::confluence::install'],
-    }
+    class { '::confluence::params': before => Class['::confluence::install'] }
   }
 
-  anchor { 'confluence::start': } ->
-  class { '::confluence::install': } ->
-  class { '::confluence::config': } ~>
-  class { '::confluence::service': } ->
-  anchor { 'confluence::end': }
+  class { '::confluence::install': before => Class['::confluence::config'] }
+  class { '::confluence::config': notify => Class['::confluence::service'] }
+  class { '::confluence::service': }
 
   if ($enable_sso) {
     class { '::confluence::sso':
