@@ -3,7 +3,7 @@
 <confluence-configuration>
   <setupStep><%= scope.lookupvar('confluence::setupstep') %></setupStep>
   <setupType>custom</setupType>
-  <buildNumber><%= scope.lookupvar('confluence::buildnumber') %></buildNumber>
+  <buildNumber><%= scope.lookupvar('confluence::buildnumber').to_s %></buildNumber>
   <properties>
     <property name="admin.ui.allow.daily.backup.custom.location">false</property>
     <property name="admin.ui.allow.manual.backup.download">false</property>
@@ -21,7 +21,7 @@
     <property name="hibernate.connection.driver_class"><%= scope.lookupvar('confluence::dbdriver') %></property>
     <property name="hibernate.connection.isolation">2</property>
     <property name="hibernate.connection.password"><%= scope.lookupvar('confluence::dbpassword') %></property>
-    <property name="hibernate.connection.url">jdbc:<%= scope.lookupvar('confluence::dbprotocol') %>://<%= scope.lookupvar('confluence::dbhost') %>:<%= scope.lookupvar('confluence::dbport') %>/<%= scope.lookupvar('confluence::dbname') %></property>
+    <property name="hibernate.connection.url">jdbc:<%= scope.lookupvar('confluence::dbprotocol') %>://<%= scope.lookupvar('confluence::dbhost') %>:<%= scope.lookupvar('confluence::dbport').to_s %>/<%= scope.lookupvar('confluence::dbname') %></property>
     <property name="hibernate.connection.username"><%= scope.lookupvar('confluence::dbuser') %></property>
     <property name="hibernate.database.lower_non_ascii_supported">true</property>
     <property name="hibernate.dialect"><%= scope.lookupvar('confluence::dbdialect') %></property>

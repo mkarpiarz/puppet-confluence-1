@@ -70,6 +70,19 @@ class confluence (
   $session_tokenkey = 'session.tokenkey',
   $session_validationinterval = 5,
   $session_lastvalidation = 'session.lastvalidation',
+
+  # Enable post-install configuration of Confluence.
+  $enable_post_install = false,
+  $dbtype = 'postgresql',
+  $setupstep = 'complete',
+  $serverid = undef,
+  $buildnumber = 5781,
+  $licensemessage = undef,
+  $dbhost = 'localhost',
+  $dbport = 5432,
+  $dbname = 'confluence',
+  $dbuser = 'confluence',
+  $dbpassword = undef,
 ) {
 
   validate_re($version, '^(?:(\d+)\.)?(?:(\d+)\.)?(\*|\d+)(|[a-z])$')
@@ -114,6 +127,35 @@ class confluence (
 
   if ($enable_sso) {
     class { '::confluence::sso':
+    }
+  }
+
+  if ($enable_post_install) {
+    if $setupstep != 'complete' and $setupstep != 'setupdata-start' {
+      fail('setupstep must be either "complete" or "setupdata-start"')
+    }
+
+    if $serverid == undef {
+      fail('You need to specify a value for serverid')
+    }
+
+    if $licensemessage == undef {
+      fail('You need to specify a value for licensemessage')
+    }
+
+    if $dbpassword == undef {
+      fail('You need to specify a value for dbpassword')
+    }
+
+    if $dbtype == 'postgresql' {
+      $dbdriver = 'org.postgresql.Driver'
+      $dbprotocol = 'postgresql'
+      $dbdialect = 'net.sf.hibernate.dialect.PostgreSQLDialect'
+
+      class { '::confluence::post_install': }
+    }
+    else {
+      fail('Unsupported type of database.')
     }
   }
 }
