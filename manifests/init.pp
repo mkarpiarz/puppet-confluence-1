@@ -72,18 +72,18 @@ class confluence (
   $session_lastvalidation = 'session.lastvalidation',
 
   # Enable post-install configuration of Confluence.
-  $enable_post_install = false,
-  $dbtype = 'postgresql',
-  $setupstep = 'complete',
-  $serverid = undef,
-  $buildnumber = 5781,
-  $licensemessage = undef,
-  $dbhost = 'localhost',
-  $dbport = 5432,
-  $dbname = 'confluence',
-  $dbuser = 'confluence',
-  $dbpassword = undef,
-) {
+  $enable_post_install  = $confluence::params::enable_post_install,
+  $dbtype               = $confluence::params::dbtype,
+  $setupstep            = $confluence::params::setupstep,
+  $serverid             = $confluence::params::serverid,
+  $buildnumber          = $confluence::params::buildnumber,
+  $licensemessage       = $confluence::params::licensemessage,
+  $dbhost               = $confluence::params::dbhost,
+  $dbport               = $confluence::params::dbport,
+  $dbname               = $confluence::params::dbname,
+  $dbuser               = $confluence::params::dbuser,
+  $dbpassword           = $confluence::params::dbpassword,
+) inherits confluence::params {
 
   validate_re($version, '^(?:(\d+)\.)?(?:(\d+)\.)?(\*|\d+)(|[a-z])$')
   validate_absolute_path($installdir)
@@ -113,12 +113,8 @@ class confluence (
   }
 
   if ($enable_custom_facts) {
-    # if custom facts are enabled, use appriopriate manifest
+    # if custom facts are enabled, use appropriate manifest
     class { '::confluence::facts': before => Class['::confluence::install'] }
-  }
-  else {
-    # only get parameters (which confluence::facts is inheriting)
-    class { '::confluence::params': before => Class['::confluence::install'] }
   }
 
   class { '::confluence::install': before => Class['::confluence::config'] }
