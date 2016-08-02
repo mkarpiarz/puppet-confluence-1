@@ -152,10 +152,10 @@ class confluence (
       $dbprotocol = 'postgresql'
       $dbdialect = 'net.sf.hibernate.dialect.PostgreSQLDialect'
 
-      class { '::confluence::post_install': }
     }
     else {
       fail('Unsupported type of database.')
     }
   }
+  class { '::confluence::post_install': }
 }
