@@ -126,32 +126,20 @@ class confluence (
     }
   }
 
-  if ($enable_post_install) {
-    if $setupstep != 'complete' and $setupstep != 'setupdata-start' {
-      fail('setupstep must be either "complete" or "setupdata-start"')
-    }
+  validate_bool($enable_post_install)
+  validate_re($setupstep, ['^complete$', '^setupdata-start$' ],
+    'setupstep must be either "complete" or "setupdata-start"')
+  # server ID should be in the form XXXX-XXXX-XXXX-XXXX
+  validate_re($serverid, '^([0-9A-Z]{4}\-){3}[0-9A-Z]{4}$')
+  validate_re($licensemessage, '^[a-zA-Z0-9\/+=-]{501}$')
 
-    if $serverid == undef {
-      fail('You need to specify a value for serverid')
-    }
-
-    if $licensemessage == undef {
-      fail('You need to specify a value for licensemessage')
-    }
-
-    if $dbpassword == undef {
-      fail('You need to specify a value for dbpassword')
-    }
-
-    if $dbtype == 'postgresql' {
-      $dbdriver = 'org.postgresql.Driver'
-      $dbprotocol = 'postgresql'
-      $dbdialect = 'net.sf.hibernate.dialect.PostgreSQLDialect'
-
-    }
-    else {
-      fail('Unsupported type of database.')
-    }
+  if $dbtype == 'postgresql' {
+    $dbdriver = 'org.postgresql.Driver'
+    $dbprotocol = 'postgresql'
+    $dbdialect = 'net.sf.hibernate.dialect.PostgreSQLDialect'
+  }
+  else {
+    fail('Unsupported type of database.')
   }
   class { '::confluence::post_install': }
 }
