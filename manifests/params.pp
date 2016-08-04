@@ -2,21 +2,7 @@
 #
 # Defines default values for confluence module
 #
-class confluence::params (
-  # Enable post-install configuration of Confluence.
-  $enable_post_install = false,
-  $dbtype = 'postgresql',
-  $setupstep = 'complete',
-  $serverid,
-  $buildnumber = 5781,
-  $licensemessage,
-  $dbhost = 'localhost',
-  $dbport = 5432,
-  $dbname,
-  $dbuser,
-  $dbpassword,
-) {
-
+class confluence::params {
   case $::osfamily {
     /RedHat/: {
       if $::operatingsystemmajrelease == '7' {
@@ -38,4 +24,17 @@ class confluence::params (
     }
     default: { fail('Only osfamily Debian and Redhat are supported') }
   }
+
+  # Enable post-install configuration of Confluence.
+  $enable_post_install  = false
+  $dbtype               = 'postgresql'
+  $setupstep            = 'complete'
+  $serverid             = undef
+  $buildnumber          = 5781
+  $licensemessage       = undef
+  $dbhost               = 'localhost'
+  $dbport               = 5432
+  $dbname               = undef
+  $dbuser               = undef
+  $dbpassword           = undef
 }
