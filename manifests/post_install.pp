@@ -9,7 +9,7 @@ class confluence::post_install(
   file {"${confluence::homedir}/confluence.cfg.xml":
     owner   => $confluence::user,
     group   => $confluence::group,
-    mode    => '0644',
+    mode    => '0664',
     ensure  => present,
     content => template('confluence/confluence.cfg.xml.erb'),
     replace => $enabled,
