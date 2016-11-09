@@ -145,6 +145,6 @@ class confluence (
     else {
       fail('Unsupported type of database.')
     }
+    class { '::confluence::post_install': }
   }
-  class { '::confluence::post_install': }
 }
